@@ -17,6 +17,16 @@ The following line tells Rust to take the constructors of NumberOrNothing into t
 
 `vec!` is a macro (as indicated by `!`) that constructs a constant Vec<\_> with the given elements.
 
+More guides in Rust Macro: [A Beginner's Guide to Rust Macros](https://medium.com/@phoomparin/a-beginners-guide-to-rust-macros-5c75594498f1)
+
 `println!` is again a macro, where the first argument is a format string. For now, you just need to know that `{}` is the placeholder for a value, and that Rust will check at compile-time that you supplied the right number of arguments.
 
 A function implicitly returns `()` as its body has no tail or `return` expression
+
+## Part 01: Expressions, Inherent methods
+
+Rust is an “expression-based” language, which means that most of the terms you write down are not just statements (executing code), but expressions (returning a value). This applies even to the body of entire functions!
+
+This is very close to how mathematicians write down functions (but with more types).
+
+Every arm of the match gives the expression that is returned in the respective case.
