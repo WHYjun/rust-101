@@ -30,3 +30,13 @@ Rust is an “expression-based” language, which means that most of the terms y
 This is very close to how mathematicians write down functions (but with more types).
 
 Every arm of the match gives the expression that is returned in the respective case.
+
+## Part 02: Generic Types, Traits
+
+In fact, a type like `SomethingOrNothing<T>` is so useful that it is already present in the standard library: It’s called an option type, written `Option<T>`. The types are so similar, that we can provide a generic function to construct a `SomethingOrNothing<T>` from an `Option<T>`
+
+Observe how new does not have a self parameter. This corresponds to a static method in Java or C++. With self parameter=> Static method, Without self parameter => Class method
+
+A `trait` is a lot like interfaces in Java: You define a bunch of functions you want to have implemented, and their argument and return types.
+
+The function min takes two arguments of the same type, but I made the first argument the special self argument. I could, alternatively, have made min a static function as follows: fn min(a: Self, b: Self) -> Self. However, in Rust one typically prefers methods over static functions wherever possible. (e.g fn min(self, b:Self) -> Self)
