@@ -40,3 +40,23 @@ Observe how new does not have a self parameter. This corresponds to a static met
 A `trait` is a lot like interfaces in Java: You define a bunch of functions you want to have implemented, and their argument and return types.
 
 The function min takes two arguments of the same type, but I made the first argument the special self argument. I could, alternatively, have made min a static function as follows: fn min(a: Self, b: Self) -> Self. However, in Rust one typically prefers methods over static functions wherever possible. (e.g fn min(self, b:Self) -> Self)
+
+## Part 03: Input
+
+I/O is provided by the module std::io, so we first have to import that with use. We also import the I/O prelude, which makes a bunch of commonly used I/O stuff directly available.
+
+While it is possible to call new for a particular type (Vec::<i32>::new()), the common way to make sure we get the right type is to annotate a type at the variable. It is this variable that we interact with for the rest of the function, so having its type available (and visible!) is much more useful.
+
+The central handle to the standard input is made available by the function io::stdin.
+
+We would now like to iterate over standard input line-by-line. We can use a for loop for that, but there is a catch: What happens if there is some other piece of code running concurrently, that also reads from standard input? The result would be a mess. Hence Rust requires us to `lock` standard input if we want to perform large operations on it.
+
+This time we use a match to handle errors (like, the user entering something that is not a number). This is a common pattern in Rust: Operations that could go wrong will return Option or Result. The only way to get to the value we are interested in is through pattern matching (and through helper functions like unwrap). If we call a function that returns a Result, and throw the return value away, the compiler will emit a warning. It is hence impossible for us to forget handling an error, or to accidentally use a value that doesn’t make any sense because there was an error producing it.
+
+```
+match line.trim().parse::<i32>() {
+            Ok(num) => vec.push(num),
+            // We don't care about the particular error, so we ignore it with a `_`.
+            Err(_) => println!("What did I say about numbers?"),
+        }
+```
