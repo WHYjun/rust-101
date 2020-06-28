@@ -60,3 +60,49 @@ match line.trim().parse::<i32>() {
             Err(_) => println!("What did I say about numbers?"),
         }
 ```
+
+## Part 04: Ownership, Borrowing, References
+
+Rust aims to be a “safe systems language”. As a systems language, of course it provides references (or pointers). But as a safe language, it has to prevent bugs. Therefore, the central principle of the Rust typesystem is to rule out mutation in the presence of aliasing. The core tool to achieve that is the notion of ownership.
+
+### Ownership
+
+Passing a `Vec<i32>` to `work_on_vector(v: Vec<i32>)` is considered transfer of ownership: Someone used to own that vector, but now he gave it on to take and has no business with it anymore. If you give a book to your friend, you cannot just come to his place next day and get the book! It’s no longer yours. Rust makes sure you don’t break this rule.
+
+### Borrowing a shared reference
+
+If you go back to our example with vec_min, and try to call that function twice, you will get the same error. That’s because vec_min demands that the caller transfers ownership of the vector. Hence, when vec_min finishes, the entire vector is deleted. That’s of course not what we wanted! Can’t we somehow give vec_min access to the vector, while retaining ownership of it? Rust calls this a reference to the vector, and it considers references as borrowing ownership.
+
+Rust distinguishes between two kinds of references. First of all, there’s the shared reference. You can give a shared reference to the same data to lots of different people, who can all access the data. This of course introduces aliasing, so in order to live up to its promise of safety, Rust generally does not allow mutation through a shared reference.
+
+The method `Vec<T>.iter` just borrows the vector it works on, and provides shared references to the elements.
+
+```
+fn shared_ref_demo() {
+    let v = vec![5,4,3,2,1];
+    let first = &v[0];
+    vec_min(&v);
+    vec_min(&v);
+    println!("The first element is: {}", *first);
+}
+```
+
+First, & is how you lend ownership to someone - this operator creates a shared reference. shared_ref_demo creates three shared references to v: The reference first begins in the 2nd line of the function and lasts all the way to the end. The other two references, created for calling vec_min, only last for the duration of that respective call.
+
+Technically, of course, references are pointers. Notice that since vec_min only gets a shared reference, Rust knows that it cannot mutate v. Hence the pointer into the buffer of v that was created before calling vec_min remains valid.
+
+### Unique, mutable references
+
+There is a second way to borrow something, a second kind of reference: The mutable reference. This is a reference that comes with the promise that nobody else has any kind of access to the referee - in contrast to shared references, there is no aliasing with mutable references. It is thus always safe to perform mutation through such a reference. Because there cannot be another reference to the same data, we could also call it a unique reference, but that is not their official name.
+
+&mut is the operator to create a mutable reference. Even though we completely own v, Rust tries to protect us from accidentally mutating things. Hence owned variables that you intend to mutate have to be annotated with mut.
+
+### Summary
+
+The ownership and borrowing system of Rust enforces the following three rules:
+
+- There is always exactly one owner of a piece of data
+- If there is an active mutable reference, then nobody else can have active access to the data
+- If there is an active shared reference, then every other active access to the data is also a shared reference
+
+As it turns out, combined with the abstraction facilities of Rust, this is a very powerful mechanism to tackle many problems beyond basic memory safety.
