@@ -87,7 +87,7 @@ fn shared_ref_demo() {
 }
 ```
 
-First, & is how you lend ownership to someone - this operator creates a shared reference. shared_ref_demo creates three shared references to v: The reference first begins in the 2nd line of the function and lasts all the way to the end. The other two references, created for calling vec_min, only last for the duration of that respective call.
+First, `&` is how you lend ownership to someone - this operator creates a shared reference. shared_ref_demo creates three shared references to v: The reference first begins in the 2nd line of the function and lasts all the way to the end. The other two references, created for calling vec_min, only last for the duration of that respective call.
 
 Technically, of course, references are pointers. Notice that since vec_min only gets a shared reference, Rust knows that it cannot mutate v. Hence the pointer into the buffer of v that was created before calling vec_min remains valid.
 
@@ -106,3 +106,17 @@ The ownership and borrowing system of Rust enforces the following three rules:
 - If there is an active shared reference, then every other active access to the data is also a shared reference
 
 As it turns out, combined with the abstraction facilities of Rust, this is a very powerful mechanism to tackle many problems beyond basic memory safety.
+
+## Part 05: Clone
+
+A `struct`, which is a lot like structs in C: Just a bunch of named fields. Every field can be private to the current module (which is the default), or public (which is indicated by a pub in front of the name).
+
+Technically, `clone` takes a borrowed vector in the form of a shared reference, and returns a fully owned one.
+
+Rust has special treatment for methods that borrow their self argument (like clone, or like test_invariant above): It is not necessary to explicitly borrow the receiver of the method. Hence you could replace (&v).clone() by v.clone() above.
+
+Making a type clonable is such a common exercise that Rust can even help you doing it: If you add `#[derive(Clone)]` right in front of the definition of BigInt, Rust will generate an implementation of Clone that simply clones all the fields. Try it! These `#[...]` annotations at types (and functions, modules, crates) are called attributes. We will see some more examples of attributes later.
+
+By writing `Something(ref v)`, we borrow v for the duration of the match arm.
+
+Mutation + aliasing considered harmful!
