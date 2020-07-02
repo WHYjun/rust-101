@@ -17,7 +17,18 @@ impl BigInt {
             other
         } else {
             // **Exercise 06.1**: Fill in this code.
-            unimplemented!()
+            let mut i = self.data.len();
+
+            while i > 0 {
+                i = i - 1;
+                if self.data[i] < other.data[i] {
+                    return self;
+                } else if self.data[i] > other.data[i] {
+                    return other;
+                }
+            }
+
+            self
         }
     }
 }
@@ -29,22 +40,24 @@ fn vec_min(v: &Vec<BigInt>) -> Option<BigInt> {
     // `iter`, the iterator that borrows the elements.
     for e in v {
         let e = e.clone();
-        unimplemented!()
+        min = Some(match min {
+            None => e,
+            Some(n) => e.min_try1(n),
+        })
     }
     min
 }
 
 // ## `Copy` types
 
-use part02::{SomethingOrNothing,Something,Nothing};
+use part02::{Nothing, Something, SomethingOrNothing};
 impl<T: Copy> Copy for SomethingOrNothing<T> {}
-
 
 // ## Lifetimes
 
 fn head<T>(v: &Vec<T>) -> Option<&T> {
     if v.len() > 0 {
-        unimplemented!()
+        Some(&v[0]) // returning a pointer to the first element.
     } else {
         None
     }
@@ -64,5 +77,3 @@ fn rust_foo(mut v: Vec<i32>) -> i32 {
     /* v.push(42); */
     *first.unwrap()
 }
-
-
