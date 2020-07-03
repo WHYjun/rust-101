@@ -13,7 +13,7 @@ pub fn vec_min<T: Minimum>(v: &Vec<T>) -> Option<&T> {
     for e in v {
         min = Some(match min {
             None => e,
-            Some(n) => n.min(e)
+            Some(n) => n.min(e),
         });
     }
     min
@@ -24,7 +24,23 @@ pub fn vec_min<T: Minimum>(v: &Vec<T>) -> Option<&T> {
 // exercise 06.1. You should *not* make any copies of `BigInt`!
 impl Minimum for BigInt {
     fn min<'a>(&'a self, other: &'a Self) -> &'a Self {
-        unimplemented!()
+        if self.data.len() < other.data.len() {
+            self
+        } else if self.data.len() > other.data.len() {
+            other
+        } else {
+            let mut index = self.data.len();
+
+            while index > 0 {
+                index = index - 1;
+                if self.data[index] > other.data[index] {
+                    return other;
+                } else if self.data[index] < other.data[index] {
+                    return self;
+                }
+            }
+            self
+        }
     }
 }
 
@@ -34,17 +50,34 @@ impl PartialEq for BigInt {
     #[inline]
     fn eq(&self, other: &BigInt) -> bool {
         debug_assert!(self.test_invariant() && other.test_invariant());
-        unimplemented!()
+        self.data == other.data
+        // Being able to test equality is a property of a type, that - you guessed it - Rust expresses as a trait: PartialEq.
+        // if self.data.len() != other.data.len() {
+        //     false
+        // } else {
+        //     let mut index = self.data.len();
+        //     while index > 0 {
+        //         index = index - 1;
+        //         if self.data[index] != other.data[index] {
+        //             return false;
+        //         }
+        //     }
+        //     true
+        // }
     }
 }
-
 
 // Now we can compare `BigInt`s. Rust treats `PartialEq` special in that it is wired to the operator
 // `==`:
 fn compare_big_ints() {
     let b1 = BigInt::new(13);
     let b2 = BigInt::new(37);
-    println!("b1 == b1: {} ; b1 == b2: {}; b1 != b2: {}", b1 == b1, b1 == b2, b1 != b2);
+    println!(
+        "b1 == b1: {} ; b1 == b2: {}; b1 != b2: {}",
+        b1 == b1,
+        b1 == b2,
+        b1 != b2
+    );
 }
 
 // ## Testing
@@ -55,7 +88,8 @@ fn test_min() {
     let b2 = BigInt::new(42);
     let b3 = BigInt::from_vec(vec![0, 1]);
 
-    unimplemented!()
+    assert!(*b1.min(&b2) == b1);
+    assert!(*b3.min(&b2) == b2);
 }
 // Now run `cargo test` to execute the test. If you implemented `min` correctly, it should all work!
 
@@ -72,7 +106,7 @@ impl fmt::Debug for BigInt {
 }
 
 // Now we are ready to use `assert_eq!` to test `vec_min`.
-/*#[test]*/
+#[test]
 fn test_vec_min() {
     let b1 = BigInt::new(1);
     let b2 = BigInt::new(42);
@@ -80,15 +114,53 @@ fn test_vec_min() {
 
     let v1 = vec![b2.clone(), b1.clone(), b3.clone()];
     let v2 = vec![b2.clone(), b3.clone()];
-    unimplemented!()
+    assert_eq!(vec_min(&v1), Some(&b1));
+    assert_eq!(vec_min(&v2), Some(&b2));
 }
 
 // **Exercise 07.1**: Add some more testcases. In particular, make sure you test the behavior of
 // `vec_min` on an empty vector. Also add tests for `BigInt::from_vec` (in particular, removing
 // trailing zeros). Finally, break one of your functions in a subtle way and watch the test fail.
+#[test]
+fn test_vec_min_on_empty_vec() {
+    let mut v: Vec<BigInt> = Vec::new();
+    assert_eq!(vec_min(&v), None);
+}
+
+#[test]
+fn test_vec_min_on_from_vec() {
+    let b1 = BigInt::new(1);
+    let b2 = BigInt::from_vec(vec![0, 1, 0]);
+
+    let v = vec![b1.clone(), b2.clone()];
+    assert_eq!(vec_min(&v), Some(&b1));
+    assert_ne!(vec_min(&v), Some(&b2));
+}
 
 // **Exercise 07.2**: Go back to your good ol' `SomethingOrNothing`, and implement `Display` for it.
 // (This will, of course, need a `Display` bound on `T`.) Then you should be able to use them with
 // `println!` just like you do with numbers, and get rid of the inherent functions to print
 // `SomethingOrNothing<i32>` and `SomethingOrNothing<f32>`.
+use part02::{Nothing, Something, SomethingOrNothing};
 
+pub trait Display {
+    fn print_display(self);
+}
+
+impl Display for SomethingOrNothing<i32> {
+    fn print_display(self) {
+        match self {
+            Nothing => println!("Nothing"),
+            Something(n) => println!("{}", n),
+        }
+    }
+}
+
+impl Display for SomethingOrNothing<f32> {
+    fn print_display(self) {
+        match self {
+            Nothing => println!("Nothing"),
+            Something(n) => println!("{}", n),
+        }
+    }
+}

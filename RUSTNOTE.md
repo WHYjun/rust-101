@@ -169,3 +169,31 @@ The first rule is that each parameter that is a reference gets its own lifetime 
 The second rule is if there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters: `fn foo<'a>(x: &'a i32) -> &'a i32.`
 
 The third rule is if there are multiple input lifetime parameters, but one of them is `&self` or `&mut self` because this is a method, the lifetime of self is assigned to all output lifetime parameters. This third rule makes methods much nicer to read and write because fewer symbols are necessary.
+
+## Part 07: Operator Overloading, Tests, Formatting
+
+### Operator Overloading
+
+Usually, there is a trait like this that fits the purpose - and if there is, this has the great advantage that any type you write, that can convert to a string, just has to implement that trait to be immediately usable with all the functions out there that generalize over `ToString`. Compare that to C++ or Java, where the only chance to add a new overloading variant is to edit the class of the receiver.
+
+### Tests
+
+With our equality test written, we are now ready to write our first testcase. It doesn’t get much simpler: You just write a function (with no arguments or return value), and give it the `test` attribute. `assert!` is like `debug_assert!`, but does not get compiled away in a release build.
+
+```
+#[test]
+fn test_min() {
+    let b1 = BigInt::new(1);
+    let b2 = BigInt::new(42);
+    let b3 = BigInt::from_vec(vec![0, 1]);
+
+    assert!(*b1.min(&b2) == b1);
+    assert!(*b3.min(&b2) == b2);
+}
+```
+
+Now run `cargo test` to execute the test. If you implemented `min` correctly, it should all work!
+
+### Formatting
+
+All formating is handled by [`std::fmt`](https://doc.rust-lang.org/std/fmt/index.html).
