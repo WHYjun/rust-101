@@ -197,3 +197,38 @@ Now run `cargo test` to execute the test. If you implemented `min` correctly, it
 ### Formatting
 
 All formating is handled by [`std::fmt`](https://doc.rust-lang.org/std/fmt/index.html).
+
+## Part 08: Associated Types, Modules
+
+### Associated Types
+
+Besides static functions and methods, traits can contain associated types: This is a type chosen by every particular implementation of the trait. The methods of the trait can then refer to that type. In the case of addition, it is used to give the type of the result.
+
+In general, you can consider the two BigInt given above (in the `impl` line) input types of trait search: When a + b is invoked with a having type T and b having type U, Rust tries to find an implementation of Add for T where the right-hand type is U. The associated types, on the other hand, are output types: For every combination of input types, there’s a particular result type chosen by the corresponding implementation of Add.
+
+### Modules
+
+As you learned, tests can be written right in the middle of your development in Rust. However, it is considered good style to bundle all tests together. This is particularly useful in cases where you wrote utility functions for the tests, that no other code should use.
+
+Rust calls a bunch of definitions that are grouped together a module. You can put the tests in a submodule as follows. The `cfg` attribute controls whether this module is even compiled: If we added some functions that are useful for testing, Rust would not bother compiling them when you just build your program for normal use. Other than that, tests work as usually.
+
+```
+#[cfg(test)]
+mod tests {
+    use part05::BigInt;
+
+    #[test]
+    fn test_add() {
+        let b1 = BigInt::new(1 << 32);
+        let b2 = BigInt::from_vec(vec![0, 1]);
+
+        assert_eq!(&b1 + &b2, BigInt::from_vec(vec![1 << 32, 1]));
+    }
+}
+```
+
+As already mentioned, outside of the module, only those items declared public with pub may be used. Submodules can access everything defined in their parents. Modules themselves are also hidden from the outside per default, and can be made public with pub. When you use an identifier (or, more general, a path like `mod1::submod::name`), it is interpreted as being relative to the current module. So, for example, to access `overflowing_add` from within my_mod, you would have to give a more explicit path by writing `super::overflowing_add`, which tells Rust to look in the parent module.
+
+You can make names from other modules available locally with `use`. Per default, `use` works globally, so e.g. `use std;` imports the global name std. By adding `super::` or `self::` to the beginning of the path, you make it relative to the parent or current module, respectively. (You can also explicitly construct an absolute path by starting it with `::`, e.g., `::std::cmp::min`). You can say `pub use path;` to simultaneously import names and make them publicly available to others. Finally, you can import all public items of a module at once with `use module::*`;.
+
+Modules can be put into separate files with the syntax `mod name;`. To explain this, let me take a small detour through the Rust compilation process. Cargo starts by invoking `rustc` on the file `src/lib.rs` or `src/main.rs`, depending on whether you compile an application or a library. When `rustc` encounters a `mod name;`, it looks for the files `name.rs` and `name/mod.rs` and goes on compiling there. (It is an error for both of them to exist.) You can think of the contents of the file being embedded at this place. However, only the file where compilation started, and files `name/mod.rs` can load modules from other files. This ensures that the directory structure mirrors the structure of the modules, with `mod.rs`, `lib.rs` and `main.rs` representing a directory or crate itself (similar to, e.g., `__init__.py` in Python).
